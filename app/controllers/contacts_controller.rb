@@ -1,6 +1,6 @@
 class ContactsController < ApplicationController
   before_action :set_contact, only: %i[ show edit update destroy ]
-  after_action :kafka_message, only: %i[ create update destroy ]
+  after_action :kafka_message, :kafka_logs, only: %i[ create update destroy ]
 
   # GET /contacts or /contacts.json
   def index
@@ -78,5 +78,15 @@ class ContactsController < ApplicationController
     def kafka_message
       message = @contact.destroyed? ? @contact.as_json.merge({destroyed: true}).to_json : @contact.as_json.to_json
       DeliveryBoy.deliver(message, topic: 'contacts_message')
+    end
+
+    def kafka_logs
+      user_log = {
+        "id": @contact.id,
+        "name": @contact.name,
+        "email": @contact.email,      
+        "sys_date": Time.now.utc.to_formatted_s(:number)
+      }
+      DeliveryBoy.deliver(user_log.to_json, topic: "logs")
     end
 end
