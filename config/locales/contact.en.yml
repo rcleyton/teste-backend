@@ -1,0 +1,7 @@
+en:
+  activerecord:
+    models:
+      contact: Contact
+    attributes:
+      contact:
+        cpf_cnpj: CPF/CNPJ
